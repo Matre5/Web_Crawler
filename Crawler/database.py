@@ -1,43 +1,39 @@
-from pymongo import MongoClient, errors
+from pymongo import ReturnDocument
 from loguru import logger
 from datetime import datetime
-import os
+import motor.motor_asyncio
 
-class Database:
-    def __init__(self, uri: str=None, db_name: str = "book_crawler"):
-        
-        self.uri = uri or os.getenv("MONGO_URI", "mongodb://localhost:27017")
-        self.client = MongoClient(self.uri)
+class MongoDB:
+    def __init__(self, uri: str = "mongodb://localhost:27017", db_name: str = "bookstore"):
+        self.client = motor.motor_asyncio.AsyncIOMotorClient(uri)
         self.db = self.client[db_name]
-        self.collection = self.db["books"]
+        self.books = self.db["books"]
+        self.snapshots = self.db["snapshots"]
         
-        self.collection.create_index("source_url", unique=True)
+    async def save_books(self, book_data:dict):
         
+        book_data["last_crawled"] = datetime.utcnow()
+        
+        filter_key = {
+            'title' : book_data['title'],
+            'category' : book_data['category']
+        }
+        
+        updated_book = await self.books.find_one_and_update(
+            filter_key,
+            {'$set': book_data},
+            upsert=True,
+            return_document=ReturnDocument.AFTER
+        )
+        
+        return updated_book
     
-    def save_book(self, book_data: dict):
-        """
-        Insert or update a book document.
-        Adds metadata if not already present in the database.
-        """
-        book_data = book_data.copy() 
-        book_data.setdefault("crawl_timestamp", datetime.utcnow())
-        book_data.setdefault("status", "success")
+    async def save_snapshot(self, url:str, html:str):
+        
+        snapshot = {
+            'url': url,
+            'html' : html,
+            'timestamp' : datetime.utcnow()
+        }
+        await self.snapshots.insert_one(snapshot)
 
-        source_url = book_data.get("source_url")
-        if not source_url:
-            logger.error("Book data missing source_url, cannot save.")
-            return False
-
-        try:
-            result = self.collection.update_one(
-                {"source_url": source_url},
-                {"$set": book_data},
-                upsert=True
-            )
-            return True
-        except errors.DuplicateKeyError:
-            logger.warning(f"Duplicate key for {source_url}, skipping")
-            return False
-        except Exception as e:
-            logger.error(f"Failed to save book: {e}")
-            return False
