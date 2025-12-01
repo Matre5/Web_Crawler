@@ -1,6 +1,5 @@
 import asyncio
 from loguru import logger
-
 from fetcher import Fetcher
 from parser import Parser
 from database import MongoDB
@@ -49,7 +48,7 @@ async def discover_all_book_urls():
 async def main():
     logger.info("Let's crawllll...")
 
-    # Discover all book URLs
+    # All books url
     all_urls = await discover_all_book_urls()
     logger.success(f"Found {len(all_urls)} books.")
 
@@ -65,7 +64,7 @@ async def main():
     # Create workers
     workers = [
         Worker(db=db, fetcher=fetcher, parser=parser, queue=queue)
-        for _ in range(5) 
+        for _ in range(1) 
     ]
 
     # Start all workers

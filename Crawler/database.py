@@ -3,14 +3,17 @@ from loguru import logger
 from datetime import datetime
 import motor.motor_asyncio
 
+
+MONGO_URI = "mongodb+srv://aigmatre5_db_user:zByZ6SpZSnZBe41i@cluster001.xiunuvf.mongodb.net/"
+
 class MongoDB:
-    def __init__(self, uri: str = "mongodb://localhost:27017", db_name: str = "bookstore"):
+    def __init__(self, uri: str = MONGO_URI, db_name: str = "bookstore"):
         self.client = motor.motor_asyncio.AsyncIOMotorClient(uri)
         self.db = self.client[db_name]
         self.books = self.db["books"]
         self.snapshots = self.db["snapshots"]
         self.tasks = self.db['tasks']
-        
+        self.changes = self.db["changes"]
     async def save_books(self, book_data:dict):
         
         book_data["last_crawled"] = datetime.utcnow()
