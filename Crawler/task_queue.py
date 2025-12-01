@@ -13,13 +13,10 @@ class URLQueue:
         return await self.queue.get()
 
     def task_done(self):
-        # Mark a URL as processed.
         self.queue.task_done()
 
     def is_empty(self) -> bool:
-        # Check if the queue is empty.
         return self.queue.empty()
 
     def size(self) -> int:
-        # Return current queue size.
         return self.queue.qsize()

@@ -1,59 +1,48 @@
-import time
+import asyncio
 from loguru import logger
 
 from fetcher import Fetcher
 from parser import Parser
-from database import MongoDB  
+from database import MongoDB
+from task_queue import URLQueue
 
 
 class Worker:
-    def __init__(self, db: MongoDB, fetcher: Fetcher, parser: Parser):
+    def __init__(self, db: MongoDB, fetcher: Fetcher, parser: Parser, queue: URLQueue):
         self.db = db
         self.fetcher = fetcher
         self.parser = parser
+        self.queue = queue
 
-    def process_task(self, task):
-        task_id, url, status = task
-        logger.info(f"Processing task {task_id}: {url}")
-
-        # Mark as processing
-        self.db.update_task_status(task_id, "processing")
+    async def process_url(self, url: str):
+        logger.info(f"Processing URL: {url}")
 
         # Fetch HTML
-        html = self.fetcher.fetch(url)
+        html = await self.fetcher.fetch(url)
         if not html:
             logger.error(f"Failed to fetch {url}")
-            self.db.update_task_status(task_id, "failed")
             return
 
-        # Parse HTML
+        # Parse data
         data = self.parser.parse_book_details(html)
         if not data:
-            logger.error(f"No data parsed for {url}")
-            self.db.update_task_status(task_id, "failed")
+            logger.error(f"Failed to parse {url}")
             return
 
-        # metadata
+        # Add metadata
         data["source_url"] = url
         data["raw_html"] = html
 
-        # Saving to db
-        self.db.save_book(data)
-        self.db.save_snapshot(url, html)
+        # Save to database
+        saved_book = await self.db.save_books(data)
+        await self.db.save_snapshot(url, html)
 
-        
-        self.db.update_task_status(task_id, "done")
-        logger.success(f"Task {task_id} completed → {data.get('title')}")
+        logger.success(f"Saved → {saved_book.get('title')}")
 
-    def run(self):
+    async def run(self):
         logger.info("Worker started. Waiting for tasks...")
 
-        while True:
-            task = self.db.get_next_task()
-
-            if not task:
-                logger.info("No tasks found. Sleeping for 3 seconds...")
-                time.sleep(3)
-                continue
-
-            self.process_task(task)
+        while not self.queue.is_empty():
+            url = await self.queue.get_url()
+            await self.process_url(url)
+            self.queue.task_done()

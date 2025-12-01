@@ -57,3 +57,22 @@ class Parser:
         except Exception as e:
             logger.error(f"Failed to parse book page: {e}")
             return None
+        
+
+    def extract_book_links(self, html: str) -> list[str]:
+        soup = BeautifulSoup(html, "html.parser")
+        links = []
+
+        products = soup.select("article.product_pod h3 a")
+
+        for tag in products:
+            relative = tag.get("href")
+
+    
+            # relative = relative.replace("../../../", "")
+
+            full_url = f"https://books.toscrape.com/catalogue/{relative}"
+            links.append(full_url)
+
+        return links
+

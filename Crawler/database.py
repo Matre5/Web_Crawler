@@ -9,6 +9,7 @@ class MongoDB:
         self.db = self.client[db_name]
         self.books = self.db["books"]
         self.snapshots = self.db["snapshots"]
+        self.tasks = self.db['tasks']
         
     async def save_books(self, book_data:dict):
         
@@ -36,4 +37,12 @@ class MongoDB:
             'timestamp' : datetime.utcnow()
         }
         await self.snapshots.insert_one(snapshot)
+
+    async def get_next_task(self):
+        return await self.tasks.find_one_and_update(
+            {"status": "pending"},
+            {"$set": {"status": "processing"}},
+            sort=[("created_at", 1)],
+            return_document=ReturnDocument.AFTER
+        )
 

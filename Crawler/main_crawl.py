@@ -4,11 +4,12 @@ from loguru import logger
 from fetcher import Fetcher
 from parser import Parser
 from database import MongoDB
-from queue import URLQueue
+from task_queue import URLQueue
 from worker import Worker
+from urllib.parse import urljoin
 
 BASE_URL = "https://books.toscrape.com/"
-CATALOGUE_URL = "https://books.toscrape.com/catalogue/category/books_1/"
+CATALOGUE_URL = "https://books.toscrape.com/catalogue/"
 
 
 async def discover_all_book_urls():
@@ -25,24 +26,28 @@ async def discover_all_book_urls():
 
         # Stop when it gets to the end
         if not html:
-            logger.info("No more pages found. Discovery complete.")
+            logger.info("No more pages")
             break
 
         parser = Parser()
-        book_links = parser.extract_book_links(html)
+        raw_links = parser.extract_book_links(html)
 
-        if not book_links:
-            logger.info("Empty book list. Discovery complete.")
+        if not raw_links:
+            logger.info("Empty book list. Finished.")
             break
 
-        urls.extend(book_links)
+
+        full_links = [urljoin(page_url, link) for link in raw_links]
+
+        urls.extend(full_links)
         page += 1
 
     return urls
 
 
+
 async def main():
-    logger.info("Starting full crawl...")
+    logger.info("Let's crawllll...")
 
     # Discover all book URLs
     all_urls = await discover_all_book_urls()
@@ -51,7 +56,7 @@ async def main():
     # Initializing
     queue = URLQueue()
     for url in all_urls:
-        queue.add_url(url)
+        await queue.add_url(url)
 
     db = MongoDB()
     fetcher = Fetcher()
