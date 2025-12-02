@@ -1,10 +1,11 @@
 import asyncio
 from datetime import datetime
-from loguru import logger
+from Utilities.logger import logger
 from fetcher import Fetcher
 from parser import Parser
 from database import MongoDB
 from task_queue import URLQueue
+from Utilities.fetch import fetch
 
 
 class Worker:
@@ -17,7 +18,7 @@ class Worker:
     async def process_url(self, url: str):
         try:
             # fetching
-            html = await self.fetcher.fetch(url)
+            html = await fetch(url)
             if html is None:
                 logger.error(f"Failed to fetch {url}")
                 return

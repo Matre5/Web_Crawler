@@ -4,7 +4,7 @@ from ..Crawler.main_crawl import main
 import subprocess
 from datetime import datetime
 import json
-from loguru import logger
+from Utilities.logger import logger
 from ..Crawler.database import MongoDB
 
 # DAILY CHANGE REPORT FILE

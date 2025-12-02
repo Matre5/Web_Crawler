@@ -1,13 +1,8 @@
 from pymongo import ReturnDocument
 from Utilities.logger import logger
+from Utilities.config import MONGO_URI
 from datetime import datetime
 import motor.motor_asyncio
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
-
-MONGO_URI = os.getenv("MONGO_URI", default=None)
 
 class MongoDB:
     def __init__(self, uri: str = MONGO_URI, db_name: str = "bookstore"):

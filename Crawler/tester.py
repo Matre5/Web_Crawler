@@ -1,8 +1,8 @@
 import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
+from Utilities.config import DB_NAME, MONGO_URI
+import os
 
-MONGO_URI = "mongodb+srv://aigmatre5_db_user:zByZ6SpZSnZBe41i@cluster001.xiunuvf.mongodb.net/"
-DB_NAME = "bookstore"
 
 async def test_atlas_connection():
     try:
@@ -13,11 +13,9 @@ async def test_atlas_connection():
         collections = await db.list_collection_names()
         print(f"Connected successfully! Collections: {collections}")
 
-        # Optional: insert a test document
         result = await db["test_collection"].insert_one({"test": "ok"})
         print(f"Test document inserted with ID: {result.inserted_id}")
 
-        # Optional: remove test document
         await db["test_collection"].delete_one({"_id": result.inserted_id})
         print("Test document deleted. Connection works perfectly!")
 

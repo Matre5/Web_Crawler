@@ -1,3 +1,9 @@
+import sys
+import os
+
+# Add the Crawler root folder to Python path
+sys.path.append(os.path.dirname(__file__))
+
 import asyncio
 from Utilities.logger import logger
 from fetcher import Fetcher
@@ -6,14 +12,13 @@ from database import MongoDB
 from task_queue import URLQueue
 from worker import Worker
 from urllib.parse import urljoin
+from Utilities.config import BASE_URL, CATALOGUE_URL
+from Utilities.fetch import fetch
 
-BASE_URL = "https://books.toscrape.com/"
-CATALOGUE_URL = "https://books.toscrape.com/catalogue/"
 
 
 async def discover_all_book_urls():
 
-    fetcher = Fetcher()
     urls = []
 
     page = 1
@@ -21,7 +26,7 @@ async def discover_all_book_urls():
         page_url = f"{CATALOGUE_URL}page-{page}.html"
         logger.info(f"Discovering page: {page_url}")
 
-        html = await fetcher.fetch(page_url)
+        html = await fetch(page_url)
 
         # Stop when it gets to the end
         if not html:

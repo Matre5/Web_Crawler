@@ -1,16 +1,18 @@
+import sys
+import os
+
+sys.path.append(os.path.dirname(__file__))
+
 from fastapi import FastAPI, Query, Security, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security.api_key import APIKeyHeader
 from bson import ObjectId
 from bson.errors import InvalidId
+from Utilities.config import API_KEY
 from database import get_db
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
 db =  get_db()
 app = FastAPI(title="Web Crawlerrr", version="1.0")
-API_KEY = os.getenv("API_KEY", default=None)
 
 
 API_KEY_NAME = "entry_key"
