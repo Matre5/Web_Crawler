@@ -8,8 +8,11 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-
+db =  get_db()
+app = FastAPI(title="Web Crawlerrr", version="1.0")
 API_KEY = os.getenv("API_KEY", default=None)
+
+
 API_KEY_NAME = "entry_key"
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
@@ -24,7 +27,6 @@ async def get_api_key(api_key: str = Security(api_key_header)):
         )
 
 
-app = FastAPI(title="Web Crawlerrr", version="1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins = ["*"],
@@ -33,7 +35,6 @@ app.add_middleware(
     allow_headers = ["*"]
 )
 
-db =  get_db()
 
 def normalize_doc(doc):
     
@@ -55,80 +56,44 @@ def normalize_doc(doc):
 
     return doc
 
+def selected_fields(book):
+    return {
+        "id": str(book["_id"]),
+        "title": book.get("title"),
+        "price": book.get("price_including_tax"),
+        "availability": book.get("availability"),
+        "rating": book.get("rating"),
+        "category": book.get("category"),
+        "url": book.get("url"),
+    }
+
 @app.get("/health")
-async def health():
+async def health(api_key: str = Depends(get_api_key)):
     return {"status":"ok"}
 
-@app.get("/books")
-async def get_books(limit: int = 50):
-    books = await db.books.find().sort("title", 1).limit(limit).to_list(None)
-    S_Output = []
 
-    # selecting few rows to return
-    for book in books:
-        S_Output.append({
-            "id": str(book["_id"]),
-            "title": book.get("title"),
-            "price": book.get("price_including_tax"),
-            "availability": book.get("availability"),
-            "rating": book.get("rating"),
-            "url": book.get("url"),
-            "category": book.get("category"),
-        })
-
+@app.get("/books", description="Return books in a certain number of books per pagecd.")
+async def get_books(
+    limit: int = 20, 
+    page: int = 1, 
+    api_key: str = Depends(get_api_key)):
     
-    return normalize_doc(S_Output)
-
-@app.get("/books")
-async def get_books(limit: int = 20, page: int = 1):
     skip = (page - 1) * limit
     books = await db.books.find().sort("title", 1).skip(skip).limit(limit).to_list(None)
-
-    cleaned = [
-        {
-            "id": str(book["_id"]),
-            "title": book.get("title"),
-            "price": book.get("price_including_tax"),
-            "rating": book.get("rating"),
-            "category": book.get("category"),
-        }
-        for book in books
-    ]
-
-    return cleaned
-
-
-@app.get("/books/{book_id}")
-async def get_book(book_id: str):
-    try:
-        obj_id = ObjectId(book_id)
-    except InvalidId:
-        return {'error': 'invalid id'}
-        
-    book = await db.books.find_one({"_id": obj_id}) 
-    if not book:
-        return {"error": "Book not found"}
     
-    S_Output = {
-            "id": str(book["_id"]),
-            "title": book.get("title"),
-            "price": book.get("price_including_tax"),
-            "availability": book.get("availability"),
-            "rating": book.get("rating"),
-            "url": book.get("url"),
-            "category": book.get("category"),
-        }
-    
-    return normalize_doc(S_Output)
+    book_list = [selected_fields(book) for book in books]
 
-@app.get("/books/search")
+    return normalize_doc(book_list)
+
+@app.get("/books/search", description="Return specific book based on requests .")
 async def search_books(
     q: str | None = None,
     category: str | None = None,
     min_price: float | None = None,
     max_price: float | None = None,
     rating: int | None = None,
-    limit: int = 20
+    limit: int = 20,
+    api_key: str = Depends(get_api_key)
 ):
     query = {}
 
@@ -170,19 +135,34 @@ async def search_books(
 
     return normalize_doc(S_Output)
 
-@app.get("/categories")
-async def list_categories():
+@app.get("/books/{book_id}", description="Retrieves a book by its id number.")
+async def get_book(book_id: str, api_key: str = Depends(get_api_key)):
+    try:
+        obj_id = ObjectId(book_id)
+    except InvalidId:
+        return {'error': 'invalid id'}
+        
+    book = await db.books.find_one({"_id": obj_id}) 
+    if not book:
+        return {"error": "Book not found"}
+    
+    book_list = selected_fields(book)
+
+    return normalize_doc(book_list)
+
+@app.get("/categories", description="Return all available categories.")
+async def list_categories(api_key: str = Depends(get_api_key)):
     categories = await db.books.distinct("category")
     return {"categories": categories}
 
 
-@app.get("/changes")
-async def changes(limit: int = 100):
+@app.get("/changes", description="Return count of changes made.")
+async def changes(limit: int = 30, api_key: str = Depends(get_api_key)):
     logs = await db.changes.find().sort("timestamp", -1).limit(limit).to_list(None)
     return normalize_doc(logs)
 
-@app.get("/stats")
-async def stats():
+@app.get("/stats", description="Return total books and changes logged.")
+async def stats(api_key: str = Depends(get_api_key)):
     total_books = await db.books.count_documents({})
     total_changes = await db.changes.count_documents({})
     return {

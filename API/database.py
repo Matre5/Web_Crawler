@@ -1,6 +1,10 @@
 from motor.motor_asyncio import AsyncIOMotorClient
+from dotenv import load_dotenv
+import os
 
-MONGO_URI = "mongodb+srv://aigmatre5_db_user:zByZ6SpZSnZBe41i@cluster001.xiunuvf.mongodb.net/"
+load_dotenv()
+
+MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = "bookstore"
 
 client = None
