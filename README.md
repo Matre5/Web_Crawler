@@ -1,5 +1,5 @@
 # Web Crawling project
-A web crawler and API for scraping book data.
+A web crawler and API for scraping book data built with python and its libraries.
 This project used MongoDb to store the database; specifically MongoDb Atlas so as to have it on the cloud.  
 The data retrieved is served using FastAPI with API key aunthentication for security purposes and controlled access.
 
@@ -68,4 +68,5 @@ Page Crawling (Page 51 does not exist hence the error message and after 3 tries 
 <img width="1682" height="1008" alt="image" src="https://github.com/user-attachments/assets/fbc9bef5-1eef-4564-a842-33122ac1a8d2" />
 <img width="1912" height="395" alt="image" src="https://github.com/user-attachments/assets/03872a1a-1836-4306-8988-869edcbf525d" />
 crawler successfully found 1000 books
+
 
