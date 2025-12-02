@@ -67,7 +67,11 @@ Pytest test
 Page Crawling (Page 51 does not exist hence the error message and after 3 tries it moves on)
 <img width="1682" height="1008" alt="image" src="https://github.com/user-attachments/assets/fbc9bef5-1eef-4564-a842-33122ac1a8d2" />
 <img width="1912" height="395" alt="image" src="https://github.com/user-attachments/assets/03872a1a-1836-4306-8988-869edcbf525d" />
-crawler successfully found 1000 books
+Crawler successfully found 1000 books from 50 pages <br>
+Each book and their details crawled and stored to the database successfully
+<img width="1905" height="727" alt="image" src="https://github.com/user-attachments/assets/53d13168-091f-40a0-98ca-dc9eac82b860" />
+
+
 
 
 
