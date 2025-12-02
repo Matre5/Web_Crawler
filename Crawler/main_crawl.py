@@ -1,5 +1,5 @@
 import asyncio
-from loguru import logger
+from Utilities.logger import logger
 from fetcher import Fetcher
 from parser import Parser
 from database import MongoDB

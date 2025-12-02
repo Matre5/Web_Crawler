@@ -1,5 +1,5 @@
 from pymongo import ReturnDocument
-from loguru import logger
+from Utilities.logger import logger
 from datetime import datetime
 import motor.motor_asyncio
 from dotenv import load_dotenv

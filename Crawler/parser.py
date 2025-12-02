@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from loguru import logger
+from Utilities.logger import logger
 
 class Parser:
     def parse_book_details(self, html: str) -> dict:

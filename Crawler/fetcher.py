@@ -1,6 +1,6 @@
 import aiohttp
 import asyncio
-from loguru import logger
+from Utilities.logger import logger
 
 class Fetcher:
     def __init__(self, max_retries: int = 3, timeout: int = 10):
