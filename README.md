@@ -21,11 +21,11 @@ The data retrieved is served using FastAPI with API key aunthentication for secu
 # Setup Instructions
 1. Clone the repository
 2. Create and activate a virtual environment
-   <img width="308" height="222" alt="image" src="https://github.com/user-attachments/assets/f8bf7f76-48cb-46ea-9d77-f0efc3635dd9" />
+ <br>  <img width="308" height="222" alt="image" src="https://github.com/user-attachments/assets/f8bf7f76-48cb-46ea-9d77-f0efc3635dd9" />
 
 3. Install dependencies
  <br>  <img width="346" height="62" alt="image" src="https://github.com/user-attachments/assets/2f17dff8-962b-469c-a9c8-08605a9f4240" />
-4. Create a .env file in the root directory
+4. Create a .env file in the root directory this will hold the authentication keys.
 
 # Running the Project
 1. Start the FastAPI server
@@ -68,5 +68,6 @@ Page Crawling (Page 51 does not exist hence the error message and after 3 tries 
 <img width="1682" height="1008" alt="image" src="https://github.com/user-attachments/assets/fbc9bef5-1eef-4564-a842-33122ac1a8d2" />
 <img width="1912" height="395" alt="image" src="https://github.com/user-attachments/assets/03872a1a-1836-4306-8988-869edcbf525d" />
 crawler successfully found 1000 books
+
 
 
