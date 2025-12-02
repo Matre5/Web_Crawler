@@ -1,11 +1,11 @@
 import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from ..Crawler import main_crawl
+from ..Crawler.main_crawl import main
 import subprocess
 from datetime import datetime
 import json
 from loguru import logger
-from ..Crawler import database
+from ..Crawler.database import MongoDB
 
 # DAILY CHANGE REPORT FILE
 REPORT_PATH = "daily_change_report.json"
@@ -13,7 +13,7 @@ REPORT_PATH = "daily_change_report.json"
 
 async def generate_daily_report():
 
-    db = database.MongoDB()
+    db = MongoDB()
     since = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
 
     cursor = db.changes.find({"timestamp": {"$gte": since}})
@@ -32,7 +32,7 @@ async def generate_daily_report():
 
 async def scheduled_crawl():
     print("Starting scheduled crawl...")
-    await main_crawl.main()
+    await main()
     print("Scheduled crawl completed!")
 
 def start_scheduler():

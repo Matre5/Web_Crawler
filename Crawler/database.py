@@ -2,9 +2,12 @@ from pymongo import ReturnDocument
 from loguru import logger
 from datetime import datetime
 import motor.motor_asyncio
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
-MONGO_URI = "mongodb+srv://aigmatre5_db_user:zByZ6SpZSnZBe41i@cluster001.xiunuvf.mongodb.net/"
+MONGO_URI = os.getenv("MONGO_URI", default=None)
 
 class MongoDB:
     def __init__(self, uri: str = MONGO_URI, db_name: str = "bookstore"):
